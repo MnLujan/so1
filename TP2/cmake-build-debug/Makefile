@@ -48,10 +48,10 @@ RM = /home/mlujan/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/182.4505.18/bin
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/mlujan/CLionProjects/SistOp1/TP1
+CMAKE_SOURCE_DIR = /home/mlujan/CLionProjects/SistOp1/TP2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/mlujan/CLionProjects/SistOp1/TP1/cmake-build-debug
+CMAKE_BINARY_DIR = /home/mlujan/CLionProjects/SistOp1/TP2/cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mlujan/CLionProjects/SistOp1/TP1/cmake-build-debug/CMakeFiles /home/mlujan/CLionProjects/SistOp1/TP1/cmake-build-debug/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mlujan/CLionProjects/SistOp1/TP2/cmake-build-debug/CMakeFiles /home/mlujan/CLionProjects/SistOp1/TP2/cmake-build-debug/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mlujan/CLionProjects/SistOp1/TP1/cmake-build-debug/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mlujan/CLionProjects/SistOp1/TP2/cmake-build-debug/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -111,17 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named TP1
+# Target rules for targets named TP2
 
 # Build rule for target.
-TP1: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 TP1
-.PHONY : TP1
+TP2: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 TP2
+.PHONY : TP2
 
 # fast build rule for target.
-TP1/fast:
-	$(MAKE) -f CMakeFiles/TP1.dir/build.make CMakeFiles/TP1.dir/build
-.PHONY : TP1/fast
+TP2/fast:
+	$(MAKE) -f CMakeFiles/TP2.dir/build.make CMakeFiles/TP2.dir/build
+.PHONY : TP2/fast
 
 main.o: main.c.o
 
@@ -129,7 +129,7 @@ main.o: main.c.o
 
 # target to build an object file
 main.c.o:
-	$(MAKE) -f CMakeFiles/TP1.dir/build.make CMakeFiles/TP1.dir/main.c.o
+	$(MAKE) -f CMakeFiles/TP2.dir/build.make CMakeFiles/TP2.dir/main.c.o
 .PHONY : main.c.o
 
 main.i: main.c.i
@@ -138,7 +138,7 @@ main.i: main.c.i
 
 # target to preprocess a source file
 main.c.i:
-	$(MAKE) -f CMakeFiles/TP1.dir/build.make CMakeFiles/TP1.dir/main.c.i
+	$(MAKE) -f CMakeFiles/TP2.dir/build.make CMakeFiles/TP2.dir/main.c.i
 .PHONY : main.c.i
 
 main.s: main.c.s
@@ -147,7 +147,7 @@ main.s: main.c.s
 
 # target to generate assembly for a file
 main.c.s:
-	$(MAKE) -f CMakeFiles/TP1.dir/build.make CMakeFiles/TP1.dir/main.c.s
+	$(MAKE) -f CMakeFiles/TP2.dir/build.make CMakeFiles/TP2.dir/main.c.s
 .PHONY : main.c.s
 
 # Help Target
@@ -158,7 +158,7 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... TP1"
+	@echo "... TP2"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
