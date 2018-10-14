@@ -1,0 +1,4 @@
+<map id="get_uptime" name="get_uptime">
+<area shape="rect" id="node2" href="$_l_a_b1_8h.html#a3f585c2fb319d1cc146c50d9dc7e8ecc" title="Nos imprime la informacion basica del sistema, como hostname, Date. A su vez hace llamado a get_info_..." alt="" coords="149,5,232,32"/>
+<area shape="rect" id="node3" href="$main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Main recibe 2 parametros opcionalmente, o ninguno. En base a estos parametros el el programa imprimir..." alt="" coords="280,5,335,32"/>
+</map>
