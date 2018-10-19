@@ -1,7 +1,13 @@
 #include <stdio.h>
+#include <unistd.h>
 
-int main ()
+/**
+ * RECORDAR: unisegned sin signo
+ * @TODO TODO LO Q HAY Q HACER PAPUUUUU
+ * @return 0
+ */
+
+int main (int argc, char **argv)
 {
-  printf ("Hello, World!\n");
   return 0;
 }
