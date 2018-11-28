@@ -15,7 +15,7 @@
  * @param paths arreglo donde se alamacenaran los punteros a PATH
  * @return numero de PATH encontrados
  */
-int getPaths(char* paths[]);
+int getPaths(char *paths[]);
 
 /**
  * @brief Utilizada para la extraccion de comandos y argumentos de la linea ingresada por el teclado
@@ -31,20 +31,21 @@ int getCommands(char *argv1[], char *input1);
  * @param paths: Lista de punteros a variables PATH.
  * @param exec: Se almacenara el puntero a la ruta donde se encuentra el ejecutable.
  */
-void searchExe(char* commando, char* paths[], char* exec);
+void searchExe(char *commando, char *paths[], char *exec);
 /**
  * @brief Baash, se implementara una terminal del sistema, en la cual
  * se le ingresaran comandos asigados al path y que devolvera por pantalla lo que
  * se solicite
- * @TODO BUSQUEDA EN EL PATH
+ * @TODO Creacion de hijo y ejecuion del proceso
  * @TODO Documentacion
  * @return 0
  */
 #define buffer 256
 #define buffer2 20
+#define buffer3 50
 
 int main() {
-    char hostname[20];
+    char hostname[buffer2];
     char *user;
     gethostname(hostname, buffer2);
     user = getlogin();
@@ -54,12 +55,13 @@ int main() {
     int argc = 0;
     int NumPath = 0;
     NumPath = getPaths(paths);
-    printf("%i\n",NumPath);
+    printf("%i\n", NumPath);
+    char exec[buffer3];
     while (1) {
 
         printf("%s@%s %s$ ", user, hostname, getcwd(NULL, 256));
         /* Esperaremos el ingreso por teclado */
-         fgets(input, buffer, stdin);
+        fgets(input, buffer, stdin);
 
         if (!strcmp(input, "\n")) {
             printf("\n");
@@ -74,11 +76,9 @@ int main() {
                 chdir(argv[1]);
                 continue;
             }
-            else if(*argv[argc] == '&'){
-
-            }
-            else if()
+            searchExe(*argv, paths, exec);
         }
+
     }
 
 }
@@ -98,7 +98,7 @@ int getCommands(char *argv1[], char *input1) {
 
 }
 
-int getPaths(char* paths[]) {
+int getPaths(char *paths[]) {
 
     int NumPath = 0;
     char *path = getenv("PATH");
@@ -110,4 +110,71 @@ int getPaths(char* paths[]) {
 
     }
     return NumPath + 1;
+}
+
+void searchExe(char *commando, char *paths[], char *exec) {
+    char searchDir[50];
+    char *archivo;
+    char *dir;
+    char *NextArg;
+    int result = 0;
+
+/* Comenzamos buscando en un PATH absoluto */
+    if (commando[0] == '/') {
+        strcpy(searchDir, "/");
+        dir = strtok(commando, "/");
+        NextArg = strtok(NULL, "/");
+
+        /* Se verifica que la ruta no sea del tipo Archivo + */
+        if (NextArg == NULL) {
+            archivo = dir;
+
+            /* En caso de que asi sea, se procede a recuperar el resto de datos */
+        } else {
+            while (NextArg != NULL) {
+                dir = NextArg;
+                strcat(searchDir, dir);
+                NextArg = strtok(NULL, "/");
+                strcat(searchDir, "/");
+            }
+            archivo = dir;
+        }
+
+        /* De no cumplirse lo anterior verificamos que sea PATH relativa */
+    } else if (commando[0] == '.' && commando[1] == '/') {
+        //Guardamos el directorio en el que nos encontramos
+        getcwd(searchDir, 50);
+        strcat(searchDir, "/");
+        archivo = strtok(commando, "/");
+        archivo = strtok(NULL, "/");
+
+        /* Como ultimo recurso se busca en todos los PATHS encontrados en el sistema */
+    } else {
+        int i = 0;
+        while (paths[i] != NULL) {
+            strcpy(searchDir, paths[i]);
+            strcat(searchDir, "/");
+            strcat(searchDir, commando);
+            result = access(searchDir, F_OK);
+            if (!result) {
+                strcpy(exec, searchDir);
+                return;
+            }
+        }
+        exec = NULL;
+        printf("%i: Command not found", *commando);
+        return;
+    }
+
+    /* Terminada la busqueda se procede a verificar que sea una ruta accesible al usuario y termina la secuencia */
+    strcat(searchDir, archivo);
+    result = access(searchDir, F_OK);
+    if (!result) {
+        strcpy(searchDir, exec);
+        return;
+    } else {
+        exec = NULL;
+        printf("Acceso restringido");
+    }
+    return;
 }
