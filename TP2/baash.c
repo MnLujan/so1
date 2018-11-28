@@ -12,71 +12,102 @@
 
 /**
  * @brief Utilizada para la obtencion del path del sitema.
- * @return
+ * @param paths arreglo donde se alamacenaran los punteros a PATH
+ * @return numero de PATH encontrados
  */
-int getPath();
+int getPaths(char* paths[]);
 
 /**
  * @brief Utilizada para la extraccion de comandos y argumentos de la linea ingresada por el teclado
- * @param Se le envia un puntero a un vector el cual almacena los comandos ingresados.
- * @param Se envia un tipo entero para contabilizar la cantidad de argumentos ingresados.
- * @return 0.
+ * @param argv1 Se le envia un puntero a un vector el cual almacena los comandos ingresados.
+ * @param input1 Se envia un tipo entero para contabilizar la cantidad de argumentos ingresados.
+ * @return argc que es la cantidad de elemetos ingresados.
  */
-void getCommands(char* argv1[], char* input1);
+int getCommands(char *argv1[], char *input1);
 
+/**
+ * @brief Metodo utilizado para la busqueda del ejecutable en la variable PATH.
+ * @param commando: Comando ejcutable.
+ * @param paths: Lista de punteros a variables PATH.
+ * @param exec: Se almacenara el puntero a la ruta donde se encuentra el ejecutable.
+ */
+void searchExe(char* commando, char* paths[], char* exec);
 /**
  * @brief Baash, se implementara una terminal del sistema, en la cual
  * se le ingresaran comandos asigados al path y que devolvera por pantalla lo que
  * se solicite
- * @TODO Obetencion de PATH, busqueda relativa y absoluta.
+ * @TODO BUSQUEDA EN EL PATH
+ * @TODO Documentacion
  * @return 0
  */
-
 #define buffer 256
+#define buffer2 20
+
 int main() {
     char hostname[20];
     char *user;
-    gethostname(hostname, 20);
+    gethostname(hostname, buffer2);
     user = getlogin();
     char input[buffer];
-    char* argv[20];
-
+    char *argv[buffer2];
+    char *paths[buffer2];
+    int argc = 0;
+    int NumPath = 0;
+    NumPath = getPaths(paths);
+    printf("%i\n",NumPath);
     while (1) {
 
         printf("%s@%s %s$ ", user, hostname, getcwd(NULL, 256));
         /* Esperaremos el ingreso por teclado */
-        fgets(input, buffer, stdin);
+         fgets(input, buffer, stdin);
 
-        if (!strcmp(input,"\n")) {
+        if (!strcmp(input, "\n")) {
             printf("\n");
             continue;
 
         } else {
-            getCommands(argv,input);
-
-            if (!strcmp(input,"exit\n")) {
+            argc = getCommands(argv, input);
+            printf("%i\n", argc);
+            if ((!strcmp(input, "exit\n")) || (!strcmp(input, "\n"))) {
                 return 0;
-            } else if (!strcmp(argv, "cd")){
-                //chdir(argv[1]);
+            } else if (!strcmp(argv[0], "cd")) {
+                chdir(argv[1]);
                 continue;
             }
+            else if(*argv[argc] == '&'){
+
+            }
+            else if()
         }
     }
 
 }
 
-void getCommands(char* argv1[], char* input1) {
-int argc = 0;
-argv1[argc] = strtok(input1," ");
-//argc++;
+int getCommands(char *argv1[], char *input1) {
+    int argc = 0;
+    argv1[argc] = strtok(input1, " ");
 
-while (argv1[argc] != NULL){
-    printf("%s\n", argv1[argc]);
-    argc ++;
-    argv1[argc] = strtok (NULL," \n");
+    while (argv1[argc] != NULL) {
+        //printf("%s\n", argv1[argc]);
+        argc++;
+        argv1[argc] = strtok(NULL, " \n");
+
+    }
+
+    return argc;
 
 }
 
-return;
+int getPaths(char* paths[]) {
 
+    int NumPath = 0;
+    char *path = getenv("PATH");
+
+    paths[NumPath] = strtok(path, ":");
+    while (paths[NumPath] != NULL) {
+        NumPath++;
+        paths[NumPath] = strtok(NULL, ":");
+
+    }
+    return NumPath + 1;
 }
