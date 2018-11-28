@@ -4,34 +4,27 @@
  *
  */
 
+/*
+|**********************************************************************;
+* Proyecto           : Implemetancion de un Shell - TP2
+*
+* Nombre de programa   : Baash
+|**********************************************************************;
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <memory.h>
 
-/**
- * @brief Utilizada para la obtencion del path del sitema.
- * @param paths arreglo donde se alamacenaran los punteros a PATH
- * @return numero de PATH encontrados
- */
+#define buffer 256
+#define buffer2 20
+#define buffer3 50
+
 int getPaths(char *paths[]);
-
-/**
- * @brief Utilizada para la extraccion de comandos y argumentos de la linea ingresada por el teclado
- * @param argv1 Se le envia un puntero a un vector el cual almacena los comandos ingresados.
- * @param input1 Se envia un tipo entero para contabilizar la cantidad de argumentos ingresados.
- * @return argc que es la cantidad de elemetos ingresados.
- */
 int getCommands(char *argv1[], char *input1);
-
-/**
- * @brief Metodo utilizado para la busqueda del ejecutable en la variable PATH.
- * @param commando: Comando ejcutable.
- * @param paths: Lista de punteros a variables PATH.
- * @param exec: Se almacenara el puntero a la ruta donde se encuentra el ejecutable.
- */
 void searchExe(char *commando, char *paths[], char *exec);
+
 /**
  * @brief Baash, se implementara una terminal del sistema, en la cual
  * se le ingresaran comandos asigados al path y que devolvera por pantalla lo que
@@ -40,10 +33,6 @@ void searchExe(char *commando, char *paths[], char *exec);
  * @TODO Documentacion
  * @return 0
  */
-#define buffer 256
-#define buffer2 20
-#define buffer3 50
-
 int main() {
     char hostname[buffer2];
     char *user;
@@ -83,6 +72,11 @@ int main() {
 
 }
 
+/**
+ * @brief Utilizada para la obtencion del path del sitema.
+ * @param paths arreglo donde se alamacenaran los punteros a PATH
+ * @return numero de PATH encontrados
+ */
 int getCommands(char *argv1[], char *input1) {
     int argc = 0;
     argv1[argc] = strtok(input1, " ");
@@ -98,6 +92,12 @@ int getCommands(char *argv1[], char *input1) {
 
 }
 
+/**
+ * @brief Utilizada para la extraccion de comandos y argumentos de la linea ingresada por el teclado
+ * @param argv1 Se le envia un puntero a un vector el cual almacena los comandos ingresados.
+ * @param input1 Se envia un tipo entero para contabilizar la cantidad de argumentos ingresados.
+ * @return argc que es la cantidad de elemetos ingresados.
+ */
 int getPaths(char *paths[]) {
 
     int NumPath = 0;
@@ -112,6 +112,12 @@ int getPaths(char *paths[]) {
     return NumPath + 1;
 }
 
+/**
+ * @brief Metodo utilizado para la busqueda del ejecutable en la variable PATH.
+ * @param commando: Comando ejcutable.
+ * @param paths: Lista de punteros a variables PATH.
+ * @param exec: Se almacenara el puntero a la ruta donde se encuentra el ejecutable.
+ */
 void searchExe(char *commando, char *paths[], char *exec) {
     char searchDir[50];
     char *archivo;
