@@ -46,6 +46,7 @@ int main() {
     NumPath = getPaths(paths);
     printf("%i\n", NumPath);
     char exec[buffer3];
+    int pid;
     while (1) {
 
         printf("%s@%s %s$ ", user, hostname, getcwd(NULL, 256));
@@ -66,6 +67,18 @@ int main() {
                 continue;
             }
             searchExe(*argv, paths, exec);
+            if(exec == NULL){
+                continue;
+            }else{
+                pid = fork();
+                if(pid<0){
+                    exit(EXIT_FAILURE);
+                }else if(pid == 0){
+
+                execv(exec,argv);
+
+                }
+            }
         }
 
     }
@@ -166,9 +179,10 @@ void searchExe(char *commando, char *paths[], char *exec) {
                 strcpy(exec, searchDir);
                 return;
             }
+            i++;
         }
         exec = NULL;
-        printf("%i: Command not found", *commando);
+        printf("%i: Command not found\n", *commando);
         return;
     }
 
