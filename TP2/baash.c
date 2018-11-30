@@ -22,7 +22,9 @@
 #define buffer3 50
 
 int getPaths(char *paths[]);
+
 int getCommands(char *argv1[], char *input1);
+
 void searchExe(char *commando, char *paths[], char *exec);
 
 /**
@@ -30,6 +32,7 @@ void searchExe(char *commando, char *paths[], char *exec);
  * se le ingresaran comandos asigados al path y que devolvera por pantalla lo que
  * se solicite
  * @TODO Creacion de hijo y ejecuion del proceso
+ * @TODO Ocuparce del FIX de el proceso hijo.
  * @TODO Documentacion
  * @return 0
  */
@@ -67,17 +70,21 @@ int main() {
                 continue;
             }
             searchExe(*argv, paths, exec);
-            if(exec == NULL){
+            if (exec == NULL) {
                 continue;
+            } else if ((pid = fork(;)) < 0) {
+                printf(" \"*** ERROR: forking child process failed\\n\" ");
+                exit(EXIT_FAILURE);
             }else{
-                pid = fork();
-                if(pid<0){
+
+                if (pid < 0) {
                     exit(EXIT_FAILURE);
-                }else if(pid == 0){
+                } else if (pid == 0)
 
-                execv(exec,argv);
+                    execv(exec, argv);
+                    continue;
 
-                }
+
             }
         }
 
