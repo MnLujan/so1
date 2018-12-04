@@ -16,12 +16,13 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <memory.h>
+#include <wait.h>
 
 #define buffer 256
 #define buffer2 20
 #define buffer3 50
 
-int getPaths(char *paths[]);
+void getPaths(char *paths[]);
 
 int getCommands(char *argv1[], char *input1);
 
@@ -45,14 +46,15 @@ int main() {
     char *argv[buffer2];
     char *paths[buffer2];
     int argc = 0;
-    int NumPath = 0;
-    NumPath = getPaths(paths);
-    printf("%i\n", NumPath);
+    //int NumPath = 0;
+    getPaths(paths);
+    //printf("%i\n", NumPath);
     char exec[buffer3];
     int pid;
     while (1) {
-
+        strcpy(input, "\n");
         printf("%s@%s %s$ ", user, hostname, getcwd(NULL, 256));
+
         /* Esperaremos el ingreso por teclado */
         fgets(input, buffer, stdin);
 
@@ -61,31 +63,32 @@ int main() {
             continue;
 
         } else {
+
+            /* Parceo los comandos ingresados */
             argc = getCommands(argv, input);
-            printf("%i\n", argc);
-            if ((!strcmp(input, "exit\n")) || (!strcmp(input, "\n"))) {
+
+            /* Realizo comprobaciones antes de crear el hijo */
+            if ((!strcmp(input, "exit"))) {
                 return 0;
             } else if (!strcmp(argv[0], "cd")) {
                 chdir(argv[1]);
                 continue;
-            }
-            searchExe(*argv, paths, exec);
-            if (exec == NULL) {
-                continue;
-            } else if ((pid = fork(;)) < 0) {
-                printf(" \"*** ERROR: forking child process failed\\n\" ");
-                exit(EXIT_FAILURE);
-            }else{
+            } else {
+                searchExe(*argv, paths, exec);
 
-                if (pid < 0) {
-                    exit(EXIT_FAILURE);
-                } else if (pid == 0)
-
-                    execv(exec, argv);
+                /* Se corrobora que se haya encontrado el ejecutable */
+                if (exec[0] == 0) {
                     continue;
-
+                } else if ((pid = fork()) < 0) {
+                    printf(" \"*** ERROR: forking child process failed\\n\" ");
+                    exit(EXIT_FAILURE);
+                } else if (pid == 0) {
+                    execv(exec, argv);
+                    perror(exec);
+                }
 
             }
+            wait(pid);
         }
 
     }
@@ -99,7 +102,7 @@ int main() {
  */
 int getCommands(char *argv1[], char *input1) {
     int argc = 0;
-    argv1[argc] = strtok(input1, " ");
+    argv1[argc] = strtok(input1, " " "\n");
 
     while (argv1[argc] != NULL) {
         //printf("%s\n", argv1[argc]);
@@ -118,18 +121,18 @@ int getCommands(char *argv1[], char *input1) {
  * @param input1 Se envia un tipo entero para contabilizar la cantidad de argumentos ingresados.
  * @return argc que es la cantidad de elemetos ingresados.
  */
-int getPaths(char *paths[]) {
+void getPaths(char *paths[]) {
 
     int NumPath = 0;
     char *path = getenv("PATH");
-
+/* Cada path encontrado se guarda en un arreglo de punteros  */
     paths[NumPath] = strtok(path, ":");
     while (paths[NumPath] != NULL) {
         NumPath++;
         paths[NumPath] = strtok(NULL, ":");
 
     }
-    return NumPath + 1;
+    return;
 }
 
 /**
@@ -188,8 +191,8 @@ void searchExe(char *commando, char *paths[], char *exec) {
             }
             i++;
         }
-        exec = NULL;
-        printf("%i: Command not found\n", *commando);
+        exec[0] = NULL;
+        printf("%i: Command not found (programa)\n", *commando);
         return;
     }
 
@@ -200,7 +203,7 @@ void searchExe(char *commando, char *paths[], char *exec) {
         strcpy(searchDir, exec);
         return;
     } else {
-        exec = NULL;
+        exec[0] = NULL;
         printf("Acceso restringido");
     }
     return;
