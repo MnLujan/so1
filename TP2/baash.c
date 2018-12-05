@@ -45,12 +45,13 @@ int main() {
     char input[buffer];
     char *argv[buffer2];
     char *paths[buffer2];
-    int argc = 0;
+    int argc = -1;
     //int NumPath = 0;
     getPaths(paths);
     //printf("%i\n", NumPath);
     char exec[buffer3];
     int pid;
+    int background;
     while (1) {
         strcpy(input, "\n");
         printf("%s@%s %s$ ", user, hostname, getcwd(NULL, 256));
@@ -64,9 +65,9 @@ int main() {
 
         } else {
 
-            /* Parceo los comandos ingresados */
-            argc = getCommands(argv, input);
-
+            /* Parceo los comandos ingresados y devuelvo si hay background o no */
+            background = getCommands(argv, input);
+            //printf("%i", background);
             /* Realizo comprobaciones antes de crear el hijo */
             if ((!strcmp(input, "exit"))) {
                 return 0;
@@ -88,7 +89,13 @@ int main() {
                 }
 
             }
-            wait(pid);
+            if (!background) {
+                printf("bien ahi\n");
+                wait(&pid);
+            } else {
+                waitpid(pid, &argc, WNOHANG);
+                background = 0;
+            }
         }
 
     }
@@ -102,6 +109,7 @@ int main() {
  */
 int getCommands(char *argv1[], char *input1) {
     int argc = 0;
+    int back = 0;
     argv1[argc] = strtok(input1, " " "\n");
 
     while (argv1[argc] != NULL) {
@@ -110,8 +118,16 @@ int getCommands(char *argv1[], char *input1) {
         argv1[argc] = strtok(NULL, " \n");
 
     }
+    if (!strcmp(argv1[argc - 1], "&")) {
+        back = 1;
+        argv1[argc-1] = NULL;
+        return back;
+    } else {
 
-    return argc;
+        back = 0;
+        return back;
+    }
+
 
 }
 
@@ -191,7 +207,7 @@ void searchExe(char *commando, char *paths[], char *exec) {
             }
             i++;
         }
-        exec[0] = NULL;
+        exec[0] = 0;
         printf("%i: Command not found (programa)\n", *commando);
         return;
     }
@@ -200,10 +216,10 @@ void searchExe(char *commando, char *paths[], char *exec) {
     strcat(searchDir, archivo);
     result = access(searchDir, F_OK);
     if (!result) {
-        strcpy(searchDir, exec);
+        strcpy(exec, searchDir);
         return;
     } else {
-        exec[0] = NULL;
+        exec[0] = 0;
         printf("Acceso restringido");
     }
     return;
