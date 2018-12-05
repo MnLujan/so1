@@ -32,8 +32,7 @@ void searchExe(char *commando, char *paths[], char *exec);
  * @brief Baash, se implementara una terminal del sistema, en la cual
  * se le ingresaran comandos asigados al path y que devolvera por pantalla lo que
  * se solicite
- * @TODO Creacion de hijo y ejecuion del proceso
- * @TODO Ocuparce del FIX de el proceso hijo.
+ * @TODO Implementacon de PIPEs
  * @TODO Documentacion
  * @return 0
  */
@@ -102,10 +101,13 @@ int main() {
 
 }
 
+
 /**
- * @brief Utilizada para la obtencion del path del sitema.
- * @param paths arreglo donde se alamacenaran los punteros a PATH
- * @return numero de PATH encontrados
+ * @brief Utilizada para la extraccion de comandos y argumentos de la linea ingresada por el teclado y verifica si
+ * se encuentra la presencia del argumento "&".
+ * @param argv1 Se le envia un puntero a un vector el cual almacena los comandos ingresados.
+ * @param input1 Se envia un tipo entero para contabilizar la cantidad de argumentos ingresados.
+ * @return back variable que me indica si hay que ejecutar un proceso en segundo plano.
  */
 int getCommands(char *argv1[], char *input1) {
     int argc = 0;
@@ -132,10 +134,8 @@ int getCommands(char *argv1[], char *input1) {
 }
 
 /**
- * @brief Utilizada para la extraccion de comandos y argumentos de la linea ingresada por el teclado
- * @param argv1 Se le envia un puntero a un vector el cual almacena los comandos ingresados.
- * @param input1 Se envia un tipo entero para contabilizar la cantidad de argumentos ingresados.
- * @return argc que es la cantidad de elemetos ingresados.
+ * @brief Utilizada para la obtencion del path del sitema.
+ * @param paths arreglo donde se alamacenaran los punteros a PATH
  */
 void getPaths(char *paths[]) {
 
