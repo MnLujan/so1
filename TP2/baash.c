@@ -17,25 +17,24 @@
 #include <getopt.h>
 #include <memory.h>
 #include <wait.h>
+#include <fcntl.h>
 
 #define buffer 256
-#define buffer2 20
-#define buffer3 50
 
 void getPaths(char *paths[]);
 
 int getCommands(char *argv1[], char *input1);
 
-void searchExe(char *commando, char *paths[], char *exec);
+int searchExe(char *commando, char *paths[], char *exec);
 
-int checkPipe(char *commando[], char *argv2);
+void exePipe(char *argv1[], char *argv2[], char *paths[]);
 
-void exePipe(char *argv[], char *paths[]);
+void Out(char file[]);
 
 /**
- * @brief Baash, se implementara una terminal del sistema, en la cual
- * se le ingresaran comandos asigados al path y que devolvera por pantalla lo que
- * se solicite
+ * @brief Baash, se implementara una terminal del sistema, el cual interpretara intrucciones por la entrada
+ * que se le asigne y ejecutara dichas instrucciones. El mismo puede ejecutar procesos en segundo plano mediante el
+ * operador "&". Ademas contiene funcionalidades de redireccion y tuberias (Un solo operador por vez).
  * @TODO Implementacon de PIPEs
  * @TODO Implementacion de redireccion
  * @TODO Documentacion
@@ -43,25 +42,32 @@ void exePipe(char *argv[], char *paths[]);
  * @return 0
  */
 int main() {
-    char hostname[buffer2];
+    char hostname[buffer];
     char *user;
-    gethostname(hostname, buffer2);
+    gethostname(hostname, buffer);
     user = getlogin();
     char input[buffer];
-    char *argv[buffer2];
-    char *argv2[buffer2];
-    char *paths[buffer2];
+    char *argv[buffer];
+    char *argv2[buffer];
+    char *paths[buffer];
     int argc = -1;
     getPaths(paths);
-    char exec[buffer3];
-    int pid;
+    char exec[buffer];
+    int pipe, reDirectOut, reDirectIn;
+    int exe;
     int background;
-    char filename[buffer3];
-    int pipe, reDirect;
+    int pid;
 
     while (1) {
-        strcpy(input, "\n");
+
+        /* Se limpian las banderas */
+        pipe = 0;
+        reDirectOut = 0;
+        reDirectIn = 0;
+        strcpy(input, "\0");
         printf("%s@%s %s$ ", user, hostname, getcwd(NULL, 256));
+        fflush(stdin);
+        fflush(stdout);
 
         /* Esperaremos el ingreso por teclado */
         fgets(input, buffer, stdin);
@@ -71,9 +77,30 @@ int main() {
             continue;
 
         } else {
-
-            /* Parceo los comandos ingresados y devuelvo si hay background o no */
-            background = getCommands(argv, input);
+            /* Compruebo la presencia de pipe o redireccion de entrada */
+            char *pipePos = strchr(input, '|');
+            if (pipePos != NULL) {
+                *pipePos = '\0';
+                pipe = 1;
+                background = getCommands(argv, input);
+                background = getCommands(argv2, pipePos + 1);
+            } else {
+                char *Out = strchr(input, '>');
+                char *In = strchr(input, '<');
+                if (Out != NULL) {
+                    *Out = '\0';
+                    reDirectOut = 1;
+                    background = getCommands(argv, input);
+                    background = getCommands(argv2, Out + 1);
+                } else if (In != NULL) {
+                    *In = '\0';
+                    reDirectIn = 1;
+                    background = getCommands(argv, input);
+                    background = getCommands(argv2, In + 1);
+                } else {
+                    background = getCommands(argv, input);
+                }
+            }
 
             /* Realizo comprobaciones antes de crear el hijo */
             if ((!strcmp(input, "exit"))) {
@@ -84,44 +111,64 @@ int main() {
             } else {
 
                 /* Busqueda del ejecutable */
-                searchExe(*argv, paths, exec);
-
-                /* Verificacion de pipe */
-                pipe = checkPipe(argv, argv2);
+                exe = searchExe(*argv, paths, exec);
 
                 /* Se corrobora que se haya encontrado el ejecutable */
-                if (exec[0] == 0) {
+                if (exe) {
                     continue;
-                } else if ((pid = fork()) < 0) {
-                    printf(" \"*** ERROR: forking child process failed\\n\" ");
-                    exit(EXIT_FAILURE);
-
-                    /* Proceso hijo */
                 } else {
-                    if(pipe == 1){
-                        exePipe(argv2,paths);
-                     //funcion de ejecucion pipe
-                    }else {
-                        execv(exec, argv);
-                        perror(exec);
+                    pid = fork();
+                    if (pid < 0) {
+                        printf(" \"*** ERROR: forking child process failed\\n\" ");
+                        exit(EXIT_FAILURE);
+
+                    } else if (pid == 0) {
+
+                        /* Proceso hijo */
+                        fflush(stdout);
+                        if (pipe == 1) {
+
+                            /* Ejecucion del pipe */
+                            exePipe(argv, argv2, paths);
+                        } else if (reDirectOut == 1) {
+
+                            /* Redireccion de salida */
+                            Out(argv2[0]);
+                            execv(exec, argv);
+                            perror(exec);
+                            exit(EXIT_FAILURE);
+                        } else if (reDirectIn == 1) {
+
+                            /* Redireccion de entrada */
+                            freopen(argv2[0], "r", stdin);
+                            execv(exec, argv);
+                            perror(exec);
+                            exit(EXIT_FAILURE);
+                        } else {
+
+                            /* Si no se cumplen las anteriores se ejecutara */
+                            execv(exec, argv);
+                            perror(exec);
+                            exit(EXIT_FAILURE);
+                        }
                     }
+
                 }
 
+                /* Verificamos si hay que esperar al hijo */
+                if (!background) {
+                    wait(&pid);
+                } else {
+                    background = 0;
+                    waitpid(pid, &argc, WNOHANG);
+
+                }
             }
 
-            /* Verificamos si hay que esperar al hijo */
-            if (!background) {
-                wait(&pid);
-            } else {
-                waitpid(pid, &argc, WNOHANG);
-                background = 0;
-            }
         }
 
     }
-
 }
-
 
 /**
  * @brief Utilizada para la extraccion de comandos y argumentos de la linea ingresada por el teclado y verifica si
@@ -168,7 +215,6 @@ void getPaths(char *paths[]) {
         paths[NumPath] = strtok(NULL, ":");
 
     }
-    return;
 }
 
 /**
@@ -176,9 +222,10 @@ void getPaths(char *paths[]) {
  * @param commando: Comando ejcutable.
  * @param paths: Lista de punteros a variables PATH.
  * @param exec: Se almacenara el puntero a la ruta donde se encuentra el ejecutable.
+ * @return entero, 0 si se encontro el ejecutable, 1 caso contrario.
  */
-void searchExe(char *commando, char *paths[], char *exec) {
-    char searchDir[buffer3];
+int searchExe(char *commando, char *paths[], char *exec) {
+    char searchDir[buffer];
     char *archivo;
     char *dir;
     char *NextArg;
@@ -223,13 +270,12 @@ void searchExe(char *commando, char *paths[], char *exec) {
             result = access(searchDir, F_OK);
             if (!result) {
                 strcpy(exec, searchDir);
-                return;
+                return 0;
             }
             i++;
         }
-        exec[0] = 0;
         printf("%i: Command not found (programa)\n", *commando);
-        return;
+        return 1;
     }
 
     /* Terminada la busqueda se procede a verificar que sea una ruta accesible al usuario y termina la secuencia */
@@ -237,54 +283,73 @@ void searchExe(char *commando, char *paths[], char *exec) {
     result = access(searchDir, F_OK);
     if (!result) {
         strcpy(exec, searchDir);
-        return;
+        return 0;
     } else {
-        exec[0] = 0;
         printf("Acceso restringido");
+        return 1;
     }
-    return;
-}
-
-/**
- * Funcion utilizada para la compropacion del uso de pipes.
- * @param commando se le pasan los comandos ya parceados para la busqueda.
- * @param argv2 Arreglo en el cual se guardan los argumentos para el pipe.
- * @return devuelvo un 1 en caso de que se deba implementar pipe. 0 Caso contrario.
- */
-int checkPipe(char *commando[], char *argv2) {
-    int pipe = 0;
-    int argc = 0;
-    char *Arg;
-    char *NextArg;
-    while (commando[argc] != NULL) {
-
-        if (!strcmp(commando[argc],"|")) {
-            argc ++;
-            Arg = strtok(commando[argc], " " "\n");
-            argc++;
-            NextArg = strtok(commando[argc], " " "\n");
-            strcpy(argv2, Arg);
-
-            while (NextArg != NULL){
-                strcat(argv2,NextArg);
-                argc++;
-                NextArg = strtok(commando[argc], "" "\n");
-            }
-            pipe = 1;
-            return pipe;
-
-        }else{
-            argc ++;
-        }
-    }
-    return pipe;
 }
 
 /**
  * Funcion encargada de ejecutar el pipe, creando un proceso nieto.
- * @param argv arreglo de argumentos para el pipe.
+ * @param argv arreglo de argumentos para ejecutar el proceso.
  * @param paths arreglo donde se encuentran los Paths de ejecutables del sistema.
+ * @param argv2 arreglo donde se encuentran los argumentos para el pipe.
  */
-void exePipe(char *argv[], char *paths[]){
+void exePipe(char *argv1[], char *argv2[], char *paths[]) {
 
+    char exec[buffer];
+    int fd[2], pid;
+
+    if (pipe(fd) < 0) {
+        perror("Error pipe");
+        exit(EXIT_FAILURE);
+    } else if ((pid = fork()) < 0) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+
+        /* Codigo del hijo */
+        close(fd[0]);
+        dup2(fd[1], STDOUT_FILENO); //Redireccion de la salida al pipe.
+        close(fd[1]);
+        searchExe(argv1[0], paths, exec);
+        execv(exec, argv1);
+        perror(exec);
+        exit(EXIT_FAILURE);
+    } else {
+
+        /* Codigo del padre */
+        close(fd[1]);
+        dup2(fd[0], STDIN_FILENO);
+        close(fd[0]);
+        searchExe(argv2[0], paths, exec);
+        execv(exec, argv2);
+        perror(exec);
+        exit(EXIT_FAILURE);
+    }
+
+}
+
+/**
+ * Funcion encargada de modificar la salida estandar.
+ * @param file archivo al cual se envia la salida.
+ */
+void Out(char file[]) {
+    int fid;
+    int flags, perm;
+    flags = O_WRONLY | O_CREAT | O_TRUNC;
+    perm = S_IWUSR | S_IRUSR;
+
+    fid = open(file, flags, perm);
+    if (fid < 0) {
+        perror("open");
+        exit(1);
+    }
+    close(STDOUT_FILENO);
+    if (dup(fid) < 0) {
+        perror("dup");
+        exit(1);
+    }
+    close(fid);
 }
