@@ -35,10 +35,7 @@ void Out(char file[]);
  * @brief Baash, se implementara una terminal del sistema, el cual interpretara intrucciones por la entrada
  * que se le asigne y ejecutara dichas instrucciones. El mismo puede ejecutar procesos en segundo plano mediante el
  * operador "&". Ademas contiene funcionalidades de redireccion y tuberias (Un solo operador por vez).
- * @TODO Implementacon de PIPEs
- * @TODO Implementacion de redireccion
- * @TODO Documentacion
- * @TODO Corregir la variable argc y usar una correcta para q el padre no espere
+ * @TODO DOCUMENTACION
  * @return 0
  */
 int main() {

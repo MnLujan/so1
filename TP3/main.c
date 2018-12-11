@@ -1,3 +1,10 @@
+/**
+ * @author Martin Lujan
+ * @date 11 diciembre 2018
+ * @brief Implementacion de la funcion conocida "malloc", la cual se encarga de reservar una cierta cantidad
+ * de memoria, dependiendo del argumento que esta reciba. Ademas, se ecuentra la implementacion de la funcion free
+ * encargada de liberar los bloques de memoria.
+ */
 #include <stdio.h>
 #include <zconf.h>
 #include <string.h>
@@ -13,8 +20,7 @@ struct s_block {
     struct s_block *prev; //Nodo anterior
     int free; //Si se encuentra libre o no
     void *ptr; //puntero a bloque alocado
-    /* Puntero al bloque asignado */
-    char data[1];
+    char data[1]; //Puntero al fin del bloque
 };
 
 typedef struct s_block *t_block;
@@ -39,30 +45,22 @@ void *mallocFalse(size_t size);
 
 int main() {
     /* Punteros a char e int para probar las funciones */
-    int i = 1;
+    int i;
     char *string; //4bytes un int
-    //char array[1];
-    // int *array;
-    // void *test;
 
     string = (char *) mallocFalse(1);
-   //array = string;
-    for (i; i <= 10; i++) {
+
+    for (i = 1; i <= 10; i++) {
         *string = 'a';
         string++;
     }
-    //printf("%i \n", (int)(sizeof('a')));
-    //printf("%i \n", (int)(sizeof(struct s_block)));
-    //printf("%i \n", (int)(sizeof(char [1])));
-    //printf("holis");
-    i = 1;
+
     free(string);
     /*
     for (i; i <= 10; i++) {
         *string = 'a';
         string++;
     }*/
-    // free(array);
     return 0;
 }
 
@@ -76,8 +74,8 @@ t_block extend_heap(t_block last, size_t s) {
     t_block b;
     b = sbrk(0);
 
-    if (sbrk(sizeof(struct s_block) + s) == (void *) -1) {
-   /* sbrk falla, devuelve NULL */
+    if (sbrk(BLOCK_SIZE + s) == (void *) -1) {
+        /* sbrk falla, devuelve NULL */
         return (NULL);
     }
 
@@ -131,7 +129,7 @@ void split_block(t_block b, size_t s) {
     /* Modifico el bloqu actual para que tenga en cuenta el nuevo bloque */
     b->size = s;
     b->next = new;
-    if(new->next){
+    if (new->next) {
         new->next->prev = new;
     }
 }
@@ -146,7 +144,7 @@ void *mallocFalse(size_t size) {
     size_t s;
 
     /* Alineado de punteros */
-     s = align4(size);
+    s = align4(size);
     if (base) {
 /* Primero encuentra el bloque */
         last = base;
@@ -173,6 +171,7 @@ void *mallocFalse(size_t size) {
     }
     return (b->ptr);
 }
+
 /**
  * Realiza la fusion del bloque actual con el siguiente.
  * @param b puntero al bloque a fusionar.

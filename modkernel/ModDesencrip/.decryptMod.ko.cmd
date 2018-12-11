@@ -1,0 +1,1 @@
+cmd_/home/mlujan/modkernel/ModDesencrip/decryptMod.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 -T ./scripts/module-common.lds  --build-id  -o /home/mlujan/modkernel/ModDesencrip/decryptMod.ko /home/mlujan/modkernel/ModDesencrip/decryptMod.o /home/mlujan/modkernel/ModDesencrip/decryptMod.mod.o ;  true
