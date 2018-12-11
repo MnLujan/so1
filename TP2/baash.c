@@ -35,7 +35,6 @@ void Out(char file[]);
  * @brief Baash, se implementara una terminal del sistema, el cual interpretara intrucciones por la entrada
  * que se le asigne y ejecutara dichas instrucciones. El mismo puede ejecutar procesos en segundo plano mediante el
  * operador "&". Ademas contiene funcionalidades de redireccion y tuberias (Un solo operador por vez).
- * @TODO DOCUMENTACION
  * @return 0
  */
 int main() {
