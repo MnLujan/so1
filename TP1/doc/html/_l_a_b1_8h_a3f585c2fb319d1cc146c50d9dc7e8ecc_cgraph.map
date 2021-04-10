@@ -1,6 +1,0 @@
-<map id="printincio" name="printincio">
-<area shape="rect" id="node2" href="$_l_a_b1_8h.html#a2678c9173bf4f107f29739b8ff5a2ef5" title="Imprime el tipo y modelo del CPU, extraido desde el directorio /proc/cpuinfo. " alt="" coords="136,5,245,32"/>
-<area shape="rect" id="node3" href="$_l_a_b1_8h.html#a77144d99cd85a12b3992ca5faf96b61d" title="Impresion version kernel. La siguiente funcion extrae del directorio /proc/version la version de kern..." alt="" coords="137,56,244,83"/>
-<area shape="rect" id="node4" href="$_l_a_b1_8h.html#a0024bbfc11cdcced46a020294ba258b2" title="Uptime extrae desde el directorio /proc/uptime el tiempo en segundos desde que el sistema fue iniciad..." alt="" coords="143,107,239,133"/>
-<area shape="rect" id="node5" href="$_l_a_b1_8h.html#a20966986b0f16b5229e08d9b09177f43" title="Numero files que soporta el kernel, el metodo cuenta desde el directorio /proc/filesystems la cantida..." alt="" coords="139,157,243,184"/>
-</map>
